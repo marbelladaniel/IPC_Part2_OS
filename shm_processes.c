@@ -6,9 +6,11 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-void  StudentProcess(int []);
-void  DearOldDad(int []);
-int Turn=0;  //shared,global var 
+//Collaboration with Naja Crump
+
+void  Dear_Old_Dad(int []);
+void  Poor_Student(int []);
+int Turn = 0;  
 
 int  main(int  argc, char *argv[])
 {
@@ -19,11 +21,11 @@ int  main(int  argc, char *argv[])
       
 
      
-     srandom(getpid()); //to seed random function
+     srandom(getpid()); //seeding random function
      
 
      if (argc != 3) {
-         printf("Use: %s 0 0\n", argv[0]);//takes in the name of the prgm 
+         printf("Use: %s 0 0\n", argv[0]); 
         
      }
   
@@ -62,12 +64,12 @@ int  main(int  argc, char *argv[])
           exit(1);
      }
      else if (pid == 0) { //child proc -student 
-          StudentProcess(ShmPTR); //call function below 
+          Poor_Student(ShmPTR); //call function below 
           exit(0);
      }
     else{
       //else call parent proc here 
-      DearOldDad(ShmPTR); }
+      Dear_Old_Dad(ShmPTR); }
   
      wait(&status);
      printf("Server has detected the completion of its child...\n");
@@ -79,36 +81,38 @@ int  main(int  argc, char *argv[])
      exit(0);
 }
 
-void  DearOldDad(int  SharedMem[])
+void  Dear_Old_Dad(int  account[])
 {
     int i = 0;
-    int BankAccount = SharedMem[0];
+    int BankAccount = account[0];
     int balance; 
     
    
-    for(i=0; i<25;i++)
+    for(i=0; i<25;i++) // loop 25 times 
     {
-      sleep(random() %5); //student goes to sleep for random time 0-5s
+      sleep(random() %5); //sleeps for 5-10 seconds 
       
-      //withdraws money from BA
+      //child to withdraw 
       
-        while(SharedMem[1]!=0)
-        { //Turn !=0
-          //do nothing 
+        while(account[1]!=0)
+        { 
+          //do nothing here (Turn != 0)
         }
-      BankAccount = SharedMem[0];
+      
+      
+      BankAccount = account[0];
       
        if(BankAccount<=100)
        {
-        balance=random() % 100; //get random amt of money 
+        balance = random() % 100; //deposit random amount
         
           if(balance % 2 == 0)
-          {//even 
-            BankAccount = BankAccount + balance; //deposit balance to BA
+          { 
+            BankAccount = BankAccount + balance; 
             printf("Dear old Dad: Deposits $%d / Balance = $%d\n", balance, BankAccount);
           }
           else
-          {//odd 
+          { 
             printf("Dear old Dad: Doesn't have any money to give\n");
           }
        }
@@ -117,8 +121,8 @@ void  DearOldDad(int  SharedMem[])
         printf("Dear old Dad: Thinks Student has enough Cash ($%d)\n", BankAccount);
       }
       
-      SharedMem[0]=BankAccount;  //we modif the copy , now put it back into shared mem here 
-      SharedMem[1]=1;  //Turn=1
+      account[0]=BankAccount;  
+      account[1]=1;  
     }
 
 }
@@ -126,38 +130,38 @@ void  DearOldDad(int  SharedMem[])
 
 
 
-void  StudentProcess(int  SharedMem[])
+void  Poor_Student(int account[])
 {
     int i = 0;
-    int BankAccount = SharedMem[0];
-    int balanceNeed; 
+    int BankAccount = account[0];
+    int balance; 
     
-   //child proc created here 
+//Child Starts Here 
     for(i=0; i<25;i++)
     {
-      sleep(random() %5); //student goes to sleep for random time 0-5s
+      sleep(random() %5); 
       
-      //withdraws money from BA
+      //withdraw
       
-        while(SharedMem[1]!=1)
+        while(account[1]!=1)
         {
-          //do nothing 
+          //do nothing here
         }
-      BankAccount = SharedMem[0];
-      balanceNeed=random()%50;
-      printf("Poor Student needs $%d\n", balanceNeed);
+      BankAccount = account[0];
+      balance = random()%50;
+      printf("Poor Student needs $%d\n", balance);
        
-      if(balanceNeed<=BankAccount)
+      if(balance <=BankAccount)
       {
-        BankAccount=BankAccount-balanceNeed;//then withdraw balanceNeed from BA
-        printf("Poor Student: Withdraws $%d / Bank Account Balance = $%d\n", balanceNeed, BankAccount);
+        BankAccount = BankAccount - balance;//then withdraw balance from BA
+        printf("Poor Student: Withdraws $%d / Bank Account Balance = $%d\n", balance, BankAccount);
       }
       else
       { //cannot withdraw, doesnt have enough in BA
         printf("Poor Student: Not Enough Cash ($%d)\n", BankAccount );
       }
-      SharedMem[0]=BankAccount;  //we modif the copy , now put it back into shared mem here 
+      account[0]=BankAccount;  //we modif the copy , now put it back into account here 
       
-      SharedMem[1]=0;  //Turn=0
+      account[1]=0;  //Turn=0
     }
 }
